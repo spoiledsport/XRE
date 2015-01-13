@@ -85,7 +85,7 @@ namespace Microsoft.Framework.PackageManager
 
             var success = true;
 
-            var allErrors = new List<string>();
+            var allErrors = new List<ICompilationFailure>();
             var allWarnings = new List<string>();
 
             var cacheContextAccessor = new CacheContextAccessor();
@@ -117,7 +117,7 @@ namespace Microsoft.Framework.PackageManager
                     _buildOptions.Reports.Information.WriteLine("Building {0} for {1}",
                         project.Name, targetFramework.ToString().Yellow().Bold());
 
-                    var errors = new List<string>();
+                    var errors = new List<ICompilationFailure>();
                     var warnings = new List<string>();
 
                     var context = new BuildContext(_hostServices,
@@ -277,7 +277,7 @@ namespace Microsoft.Framework.PackageManager
             }
         }
 
-        private void WriteSummary(List<string> warnings, List<string> errors)
+        private void WriteSummary(List<string> warnings, List<ICompilationFailure> errors)
         {
             _buildOptions.Reports.Information.WriteLine();
 
@@ -296,11 +296,11 @@ namespace Microsoft.Framework.PackageManager
             _buildOptions.Reports.Information.WriteLine();
         }
 
-        private void WriteDiagnostics(List<string> warnings, List<string> errors)
+        private void WriteDiagnostics(List<string> warnings, List<ICompilationFailure> errors)
         {
-            foreach (var error in errors)
+            foreach (var error in errors.SelectMany(e => e.Messages))
             {
-                WriteError(error);
+                WriteError(error.Message);
             }
 
             foreach (var warning in warnings)

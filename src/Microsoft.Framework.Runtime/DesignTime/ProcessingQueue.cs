@@ -56,10 +56,18 @@ namespace Microsoft.Framework.Runtime
                         }
 
                         var errorsCount = _reader.ReadInt32();
-                        compileResponse.Errors = new string[errorsCount];
+                        compileResponse.Errors = new CompileResponseError[errorsCount];
                         for (int i = 0; i < errorsCount; i++)
                         {
-                            compileResponse.Errors[i] = _reader.ReadString();
+                            compileResponse.Errors[i] = new CompileResponseError
+                            {
+                                FilePath = _reader.ReadString(),
+                                Message = _reader.ReadString(),
+                                StartLine = _reader.ReadInt32(),
+                                StartColumn = _reader.ReadInt32(),
+                                EndLine = _reader.ReadInt32(),
+                                EndColumn = _reader.ReadInt32()
+                            };
                         }
                         var embeddedReferencesCount = _reader.ReadInt32();
                         compileResponse.EmbeddedReferences = new Dictionary<string, byte[]>();

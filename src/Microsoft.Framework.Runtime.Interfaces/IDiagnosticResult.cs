@@ -11,6 +11,6 @@ namespace Microsoft.Framework.Runtime
 
         IEnumerable<string> Warnings { get; }
 
-        IEnumerable<string> Errors { get; }
+        IEnumerable<ICompilationFailure> Errors { get; }
     }
 }

@@ -1,23 +1,57 @@
-﻿using System;
-using System.Linq;
+﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Microsoft.Framework.Runtime.Roslyn
 {
-    public class RoslynCompilationException : CompilationException
+    /// <summary>
+    /// An implementation of <see cref="ICompilationException"/> representing Roslyn compilation exceptions.
+    /// </summary>
+    public class RoslynCompilationException : Exception, ICompilationException
     {
-        public RoslynCompilationException(IEnumerable<Diagnostic> diagnostics) :
-            base(ConvertToErrors(diagnostics))
+        private IEnumerable<ICompilationFailure> _compilationFailure;
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="RoslynCompilationException"/>.
+        /// </summary>
+        /// <param name="assemblyName">The assembly that produced the compilation exception.</param>
+        /// <param name="diagnostics">Diagnostics from Roslyn compilation.</param>
+        public RoslynCompilationException(IEnumerable<Diagnostic> diagnostics)
+            : base(GetErrorMessage(diagnostics))
         {
             Diagnostics = diagnostics;
         }
 
-        public IEnumerable<Diagnostic> Diagnostics { get; private set; }
+        /// <summary>
+        /// Gets the <see cref="IEnumerable{T}"/> of <see cref="Diagnostic"/> from Roslyn compilation.
+        /// </summary>
+        public IEnumerable<Diagnostic> Diagnostics { get; }
 
-        private static IList<string> ConvertToErrors(IEnumerable<Diagnostic> diagnostics)
+        /// <inheritdoc />
+        public IEnumerable<ICompilationFailure> CompilationFailures
         {
-            return RoslynDiagnosticUtilities.Convert(diagnostics.Where(RoslynDiagnosticUtilities.IsError)).ToList();
+            get
+            {
+                if (_compilationFailure == null)
+                {
+                    _compilationFailure = Diagnostics.GroupBy(d => d.Location.GetMappedLineSpan().Path, StringComparer.OrdinalIgnoreCase)
+                                                     .Select(d => new RoslynCompilationFailure(d));
+                }
+
+                return _compilationFailure;
+            }
+        }
+
+        private static string GetErrorMessage(IEnumerable<Diagnostic> diagnostics)
+        {
+            return string.Join(Environment.NewLine,
+                               diagnostics.Select(d => CSharpDiagnosticFormatter.Instance.Format(d)));
         }
     }
 }

@@ -81,7 +81,8 @@ namespace Microsoft.Framework.DesignTimeHost
             {
                 while (true)
                 {
-                    var message = JsonConvert.DeserializeObject<Message>(_reader.ReadString());
+                    var payload = _reader.ReadString();
+                    var message = JsonConvert.DeserializeObject<Message>(payload);
                     Trace.TraceInformation("[ProcessingQueue]: OnReceive({0})", message);
                     OnReceive(message);
                 }

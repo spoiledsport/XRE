@@ -4,7 +4,7 @@ namespace Microsoft.Framework.Runtime
 {
     public class CompileResponse
     {
-        public IList<string> Errors { get; set; }
+        public IList<CompileResponseError> Errors { get; set; }
         public IList<string> Warnings { get; set; }
 
         public IDictionary<string, byte[]> EmbeddedReferences { get; set; }
@@ -14,5 +14,4 @@ namespace Microsoft.Framework.Runtime
 
         public string AssemblyPath { get; set; }
     }
-
 }

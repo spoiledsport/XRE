@@ -676,10 +676,18 @@ namespace Microsoft.Framework.DesignTimeHost
             {
                 writer.Write(warning);
             }
-            writer.Write(project.Diagnostics.Errors.Count);
-            foreach (var error in project.Diagnostics.Errors)
+            writer.Write(project.Diagnostics.Errors.SelectMany(e => e.Messages).Count());
+            foreach (var failure in project.Diagnostics.Errors)
             {
-                writer.Write(error);
+                foreach (var message in failure.Messages)
+                {
+                    writer.Write(failure.SourceFilePath);
+                    writer.Write(message.Message);
+                    writer.Write(message.StartLine);
+                    writer.Write(message.StartColumn);
+                    writer.Write(message.EndLine);
+                    writer.Write(message.EndColumn);
+                }
             }
             writer.Write(project.Outputs.EmbeddedReferences.Count);
             foreach (var pair in project.Outputs.EmbeddedReferences)
@@ -1068,7 +1076,7 @@ namespace Microsoft.Framework.DesignTimeHost
             public IDictionary<string, byte[]> EmbeddedReferences { get; set; }
 
             public IList<string> Warnings { get; set; }
-            public IList<string> Errors { get; set; }
+            public IList<ICompilationFailure> Errors { get; set; }
 
             public bool HasOutputs
             {

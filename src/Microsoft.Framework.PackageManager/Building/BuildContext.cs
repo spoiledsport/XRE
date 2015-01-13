@@ -51,7 +51,7 @@ namespace Microsoft.Framework.PackageManager
             ShowDependencyInformation(report);
         }
 
-        public bool Build(IList<string> warnings, IList<string> errors)
+        public bool Build(IList<string> warnings, IList<ICompilationFailure> errors)
         {
             var builder = _applicationHostContext.CreateInstance<ProjectBuilder>();
 

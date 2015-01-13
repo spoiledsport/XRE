@@ -98,7 +98,7 @@ namespace Microsoft.Framework.Runtime.Roslyn
                 if (!emitResult.Success ||
                     diagnostics.Any(RoslynDiagnosticUtilities.IsError))
                 {
-                    throw new RoslynCompilationException(diagnostics);
+                    throw new RoslynCompilationException(Name, diagnostics);
                 }
 
                 Assembly assembly = null;
@@ -220,14 +220,13 @@ namespace Microsoft.Framework.Runtime.Roslyn
         private static DiagnosticResult CreateDiagnosticResult(bool success, IEnumerable<Diagnostic> diagnostics)
         {
             var formatter = new DiagnosticFormatter();
-
             var errors = diagnostics.Where(RoslynDiagnosticUtilities.IsError)
-                                .Select(d => formatter.Format(d)).ToList();
-
+                                    .ToList();
             var warnings = diagnostics.Where(d => d.Severity == DiagnosticSeverity.Warning)
                                   .Select(d => formatter.Format(d)).ToList();
 
-            return new DiagnosticResult(success, warnings, errors);
+            var exception = new RoslynCompilationException(assemblyName: null, diagnostics: errors);
+            return new DiagnosticResult(success, warnings, exception.CompilationFailures);
         }
 
         private static bool SupportsPdbGeneration()

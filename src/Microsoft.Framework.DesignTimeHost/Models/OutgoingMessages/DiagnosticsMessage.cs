@@ -3,6 +3,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Framework.Runtime;
+using Newtonsoft.Json;
 
 namespace Microsoft.Framework.DesignTimeHost.Models.OutgoingMessages
 {
@@ -11,7 +13,19 @@ namespace Microsoft.Framework.DesignTimeHost.Models.OutgoingMessages
         public FrameworkData Framework { get; set; }
 
         public IList<string> Warnings { get; set; }
-        public IList<string> Errors { get; set; }
+
+        [JsonIgnore]
+        public IList<ICompilationFailure> Errors { get; set; }
+
+        [JsonProperty(PropertyName = "Errors")]
+        public IEnumerable<string> ErrorMessages
+        {
+            get
+            {
+                return Errors.SelectMany(e => e.Messages)
+                             .Select(m => m.Message);
+            }
+        }
 
         public override bool Equals(object obj)
         {
