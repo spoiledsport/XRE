@@ -157,7 +157,10 @@ exec ""{2}{3}"" --appbase ""${0}"" Microsoft.Framework.ApplicationHost {4} ""$@"
                     string.Format(template, EnvironmentNames.AppBase, relativeAppBase, runtimeFolder, Runtime.Constants.BootstrapperExeName, commandName).Replace("\r\n", "\n"));
                 if (PlatformHelper.IsMono)
                 {
-                    MarkExecutable(scriptPath);
+                    if (!FileOperationUtils.MarkExecutable(scriptPath))
+                    {
+                        Reports.Information.WriteLine("Failed to mark {0} as executable".Yellow(), scriptPath);
+                    }
                 }
             }
         }

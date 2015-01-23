@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Microsoft.Framework.Runtime;
 using NuGet;
 
 namespace Microsoft.Framework.PackageManager
@@ -35,6 +37,27 @@ namespace Microsoft.Framework.PackageManager
                 DeleteRecursive(Path.Combine(deletePath, deleteFolderPath));
                 Directory.Delete(Path.Combine(deletePath, deleteFolderPath), recursive: true);
             }
+        }
+
+        public static bool MarkExecutable(string file)
+        {
+            if (PlatformHelper.IsWindows)
+            {
+                // This makes sense only on non Windows machines
+                return false;
+            }
+
+            var processStartInfo = new ProcessStartInfo()
+            {
+                UseShellExecute = false,
+                FileName = "chmod",
+                Arguments = "+x " + file
+            };
+
+            var process = Process.Start(processStartInfo);
+            process.WaitForExit();
+
+            return process.ExitCode == 0;
         }
 
     }
